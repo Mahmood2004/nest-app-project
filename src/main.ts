@@ -1,7 +1,11 @@
 /**
- * main.ts — Entry point. First file that runs when the server starts.
- * Sets up global ValidationPipe (applies to every route automatically) then listens on port 3000.
+ * main.ts is the entry point. It does three things: 
+ * 1.creates the NestJS app, 
+ * 2.attaches a ValidationPipe 
+ * 3.and starts listening on port 3000.
  *
+ * Everything else is wired together from here.
+ * 
  * ValidationPipe options:
  *  - whitelist: true             → removes extra fields not in the DTO
  *  - forbidNonWhitelisted: true  → throws 400 if extra fields are sent

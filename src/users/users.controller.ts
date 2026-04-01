@@ -1,5 +1,5 @@
 /**
- * users/users.controller.ts — Handles all /users routes.
+ * users/users.controller.ts — Handles all /users routes that is defined using decorators.
  *  - POST   /users      → create user
  *  - GET    /users      → get all users
  *  - GET    /users/:id  → get one user

@@ -6,6 +6,10 @@
  *  - update()  → calls findOne() first (auto 404), then updates
  *  - remove()  → calls findOne() first (auto 404), then deletes
  * NestJS maps exceptions automatically: NotFoundException → 404, BadRequestException → 400.
+ * 
+ * the service is where all the actual work haapens:checking emails, creating users, throwing 404s, deleting — every database call and 
+ * business rule lives here. 
+ * You just return a value and NestJS sends the response automatically, no res.json() like in Express.
  */
 import {
   Injectable,
