@@ -1,3 +1,8 @@
+/**
+ * app.module.ts — Root module. The top of the module tree.
+ * Imports UsersModule (user routes) and PrismaModule (database connection).
+ * Every new feature module gets added here as the app grows.
+ */
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';

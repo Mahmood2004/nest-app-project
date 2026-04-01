@@ -1,3 +1,13 @@
+/**
+ * users/users.controller.ts — Handles all /users routes.
+ *  - POST   /users      → create user
+ *  - GET    /users      → get all users
+ *  - GET    /users/:id  → get one user
+ *  - PUT    /users/:id  → update user
+ *  - DELETE /users/:id  → delete user
+ * No logic here — each method just calls the matching UsersService method.
+ * @Param('id') is a string by default (HTTP), so we convert it with Number(id).
+ */
 import {
   Controller,
   Get,

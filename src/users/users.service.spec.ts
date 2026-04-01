@@ -1,3 +1,9 @@
+/**
+ * users/users.service.spec.ts — Unit test for UsersService.
+ * Checks that UsersService can be instantiated by NestJS without errors.
+ * No real DB calls — just verifies the service is defined and injectable.
+ * Run with: npm run test
+ */
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 

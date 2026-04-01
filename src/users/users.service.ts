@@ -1,3 +1,12 @@
+/**
+ * users/users.service.ts — All user business logic and database calls.
+ *  - create()  → checks email uniqueness then inserts the user
+ *  - findAll() → returns all users
+ *  - findOne() → finds by ID, throws 404 if not found
+ *  - update()  → calls findOne() first (auto 404), then updates
+ *  - remove()  → calls findOne() first (auto 404), then deletes
+ * NestJS maps exceptions automatically: NotFoundException → 404, BadRequestException → 400.
+ */
 import {
   Injectable,
   NotFoundException,

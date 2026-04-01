@@ -1,98 +1,189 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# nest-app
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A REST API built with **NestJS** + **Prisma** + **PostgreSQL (Neon)**.
+Covers full CRUD for users with automatic request validation.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## What is NestJS (vs Express)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+If you know Express, NestJS is Express with **forced structure**.
+It runs on top of Express — but instead of writing everything freely,
+it makes you split your code into specific pieces:
 
-## Project setup
+| Piece | Job | Express equivalent |
+|---|---|---|
+| **Module** | Groups related files for one feature | A folder with an index.js |
+| **Controller** | Handles routes, calls the service | `app.get('/users', handler)` |
+| **Service** | Contains all logic and DB calls | The logic inside the handler |
+| **DTO** | Defines and validates the request body | Manual `if (!req.body.email)` checks |
 
-```bash
-$ npm install
+---
+
+## Project Structure
+
+```
+src/
+├── main.ts                        ← starts the server, sets up global validation
+├── app.module.ts                  ← root module, connects all feature modules
+├── app.controller.ts              ← handles GET / and GET /health
+├── app.service.ts                 ← logic for welcome message and health check
+│
+├── prisma/
+│   ├── prisma.module.ts           ← makes PrismaService available everywhere (@Global)
+│   └── prisma.service.ts          ← opens and manages the database connection
+│
+└── users/
+    ├── users.module.ts            ← groups everything related to users
+    ├── users.controller.ts        ← defines all /users routes
+    ├── users.service.ts           ← all user logic (create, find, update, delete)
+    └── dto/
+        ├── create-user.dto.ts     ← validation rules for creating a user
+        └── update-user.dto.ts     ← same rules but all fields are optional (for update)
 ```
 
-## Compile and run the project
+---
 
-```bash
-# development
-$ npm run start
+## How a Request Travels Through the App
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```
+Postman sends: POST /users { firstName, email, age... }
+        ↓
+  main.ts → ValidationPipe checks the body against CreateUserDto
+        ↓  (if invalid → 400 Bad Request, stops here)
+  UsersController → receives request, calls usersService.create()
+        ↓
+  UsersService → checks if email exists, then creates the user
+        ↓
+  PrismaService → talks to the PostgreSQL database (Neon)
+        ↓
+  Response sent back to Postman
 ```
 
-## Run tests
+---
+
+## Prerequisites
+
+Make sure you have these installed before running the project:
+
+- [Node.js](https://nodejs.org/) v18 or higher
+- npm (comes with Node.js)
+- A [Neon](https://neon.tech) account (free) — or any PostgreSQL database
+
+---
+
+## Getting Started (Run on your local machine)
+
+### 1. Clone the repository
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+git clone <your-repo-url>
+cd nest-app-project
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 2. Install dependencies
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 3. Set up your environment variables
 
-## Resources
+Create a `.env` file in the root of the project:
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+# .env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST/DBNAME?sslmode=require"
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+> Go to [neon.tech](https://neon.tech), create a free project, and copy the connection string.
+> It looks like: `postgresql://alex:password@ep-xyz.us-east-1.aws.neon.tech/neondb?sslmode=require`
 
-## Support
+> **Important:** Never share your `.env` file or push it to GitHub.
+> It is already listed in `.gitignore`.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### 4. Push the database schema
 
-## Stay in touch
+This creates the `User` table in your database:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+npx prisma db push
+```
 
-## License
+### 5. Start the server
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+npm run start:dev
+```
+
+The server will start at: **http://localhost:3000**
+
+---
+
+## API Routes
+
+### Root
+
+| Method | URL | Description |
+|---|---|---|
+| GET | `/` | Welcome message + API name and version |
+| GET | `/health` | Server health check (status + timestamp) |
+
+### Users
+
+| Method | URL | Body | Description |
+|---|---|---|---|
+| POST | `/users` | `{ firstName, lastName, email, age }` | Create a new user |
+| GET | `/users` | — | Get all users |
+| GET | `/users/:id` | — | Get one user by ID |
+| PUT | `/users/:id` | any field(s) from create | Update a user |
+| DELETE | `/users/:id` | — | Delete a user |
+
+### Request Body Example (POST /users)
+
+```json
+{
+  "firstName": "Ali",
+  "lastName": "Ahmed",
+  "email": "ali@example.com",
+  "age": 25
+}
+```
+
+## Available Scripts
+
+| Command | What it does |
+|---|---|
+| `npm run start:dev` | Start in dev mode (auto-restarts on save) |
+| `npm run start` | Start normally (no auto-restart) |
+| `npm run build` | Compile TypeScript to `/dist` |
+| `npm run start:prod` | Run the compiled production build |
+| `npm run test` | Run unit tests |
+
+---
+
+## Database Schema
+
+```prisma
+model User {
+  id        Int      @id @default(autoincrement())
+  firstName String
+  lastName  String
+  email     String   @unique
+  age       Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+```
+
+---
+
+## Tech Stack
+
+| Technology | Purpose |
+|---|---|
+| NestJS | Backend framework (built on Express) |
+| TypeScript | Type-safe JavaScript |
+| Prisma | Database ORM (query builder) |
+| PostgreSQL (Neon) | Cloud database |
+| class-validator | DTO validation decorators |
